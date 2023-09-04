@@ -1,13 +1,10 @@
 from django.http import Http404
-from django.shortcuts import render
-
-# Create your views here.
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from .models import Blog
 from .serializers import BlogSerializer
+from .renderers import UserRenderer
 
 
 class BlogList(generics.ListCreateAPIView):
@@ -17,6 +14,7 @@ class BlogList(generics.ListCreateAPIView):
     queryset = Blog.objects.all()
 
     serializer_class = BlogSerializer
+    renderer_classes = [UserRenderer]
 
 
     def get_queryset(self):
@@ -34,6 +32,7 @@ class BlogList(generics.ListCreateAPIView):
 
     def post(self, request, format=None):
         serializer = BlogSerializer(data=request.data)
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -43,11 +42,13 @@ class BlogList(generics.ListCreateAPIView):
 class BlogRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+    renderer_classes = [UserRenderer]
 
 class BlogDetail(APIView):
     """
     Récupère, met à jour ou supprime un blog.
     """
+    renderer_classes = [UserRenderer]
     def get_object(self, pk):
         try:
             return Blog.objects.get(pk=pk)
